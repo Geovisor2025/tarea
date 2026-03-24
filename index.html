@@ -41,6 +41,8 @@ button:hover{background:#2d4fa8}
 .role-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:bold}
 .role-admin{background:#dce8ff;color:#1e3a8a}
 .role-user{background:#d4edda;color:#1a6b30}
+.task-meta{font-size:12px;color:#555;margin:3px 0}
+.task-responsable{font-size:12px;color:#1e3a8a;font-weight:bold;margin:2px 0}
 </style>
 </head>
 <body>
@@ -69,6 +71,7 @@ button:hover{background:#2d4fa8}
     <div class="card">
       <h3>Registrar tarea</h3>
       <input type="text" id="name" placeholder="Tarea">
+      <input type="text" id="responsable" placeholder="Responsable">
       <input type="datetime-local" id="time">
       <select id="priority">
         <option value="alta">Alta</option>
@@ -126,9 +129,8 @@ button:hover{background:#2d4fa8}
 <button id="clear-btn" class="hidden-btn" onclick="clearTasks()" style="display:none">limpiar</button>
 
 <script>
-// ── USUARIOS ──────────────────────────────────────────────
 const DEFAULT_USERS = [
-  {username:"admin",    password:"AdmiN/*-",   role:"admin"},
+  {username:"admin",    password:"admin123",   role:"admin"},
   {username:"hchoquec", password:"Reynita123", role:"user"},
   {username:"rmedrano", password:"Roro123",    role:"user"}
 ];
@@ -226,13 +228,15 @@ function save(){ localStorage.setItem(taskKey(), JSON.stringify(tasks)); }
 function loadTasks(){ tasks = JSON.parse(localStorage.getItem(taskKey())) || []; }
 
 function addTask(){
-  const name = document.getElementById("name").value;
-  const time = document.getElementById("time").value;
-  const priority = document.getElementById("priority").value;
+  const name        = document.getElementById("name").value.trim();
+  const responsable = document.getElementById("responsable").value.trim();
+  const time        = document.getElementById("time").value;
+  const priority    = document.getElementById("priority").value;
   if(!name || !time) return;
-  tasks.push({name, time, priority, done:false, notified:false});
+  tasks.push({name, responsable, time, priority, done:false, notified:false});
   save(); render();
   document.getElementById("name").value = "";
+  document.getElementById("responsable").value = "";
 }
 
 function toggle(i){ tasks[i].done = !tasks[i].done; save(); render(); }
@@ -256,7 +260,12 @@ function render(){
     if(filter==="done" && !t.done) return;
     const div = document.createElement("div");
     div.className = "task " + t.priority + (t.done ? " done" : "");
-    div.innerHTML = `<b>${t.name}</b><br>${t.time}<br><button onclick="toggle(${i})">✔ Marcar</button>`;
+    const resp = t.responsable ? `<div class="task-responsable">👤 Responsable: ${t.responsable}</div>` : "";
+    div.innerHTML = `
+      <b>${t.name}</b>
+      ${resp}
+      <div class="task-meta">📅 ${t.time.replace("T"," ")}</div>
+      <button onclick="toggle(${i})" style="width:auto;padding:4px 12px;font-size:12px;margin-top:6px">✔ Marcar</button>`;
     list.appendChild(div);
   });
   const pending = total - done;
@@ -320,13 +329,14 @@ function exportExcel(){
   const rows = tasks.map((t, i) => ({
     "N°": i + 1,
     "Tarea": t.name,
+    "Responsable": t.responsable || "-",
     "Fecha / Hora": t.time.replace("T", " "),
     "Prioridad": prioLabel[t.priority] || t.priority,
     "Estado": t.done ? "Completada" : "Pendiente",
     "Usuario": currentUser.username
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws["!cols"] = [{wch:5},{wch:40},{wch:20},{wch:12},{wch:14},{wch:16}];
+  ws["!cols"] = [{wch:5},{wch:38},{wch:22},{wch:20},{wch:12},{wch:14},{wch:16}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Actividades");
   const total = tasks.length;
