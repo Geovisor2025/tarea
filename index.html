@@ -4,36 +4,73 @@
 <meta charset="UTF-8">
 <title>Sistema de Gestión de Tareas Cartografía CA</title>
 <style>
+*{box-sizing:border-box}
 body{font-family:Arial;background:#f4f6f9;margin:0}
 header{background:#1e3a8a;color:#fff;padding:15px;text-align:center}
 .container{padding:20px}
 .top-grid{display:grid;grid-template-columns:2fr 1fr;gap:15px}
 .card{background:#fff;padding:15px;margin-bottom:15px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-input,select,button{padding:8px;margin:5px;width:100%}
+input,select,button,textarea{padding:8px;margin:5px;width:100%;font-family:Arial}
 button{background:#1e3a8a;color:white;border:none;border-radius:5px;cursor:pointer}
 button:hover{background:#2d4fa8}
-.task{padding:10px;margin-top:8px;border-radius:5px}
-.alta{background:#ffcccc}
-.media{background:#fff3cd}
-.baja{background:#d4edda}
-.done{text-decoration:line-through;opacity:.6}
-.dashboard{display:grid;grid-template-columns:1fr;gap:10px}
-.metric{background:#fff;padding:10px;border-radius:8px;text-align:center}
-.hidden-btn{position:fixed;bottom:5px;right:5px;opacity:0.1;font-size:10px;background:transparent;color:#000;width:auto}
-.hidden-btn:hover{opacity:0.4}
+button:disabled{background:#aaa;cursor:not-allowed}
+.task{padding:12px;margin-top:8px;border-radius:7px;border:1px solid rgba(0,0,0,.08)}
+.alta{background:#ffcccc}.media{background:#fff3cd}.baja{background:#d4edda}
+.done{opacity:.6}.done .task-title{text-decoration:line-through}
+.task-title{font-weight:bold;font-size:15px}
+.task-meta{font-size:12px;color:#555;margin:3px 0}
+.task-responsable{font-size:12px;color:#1e3a8a;font-weight:bold;margin:2px 0}
+.task-btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.task-btns button{width:auto;padding:4px 11px;font-size:12px;margin:0}
+.btn-marcar{background:#1e3a8a}
+.btn-editar{background:#e67e22}.btn-editar:hover{background:#d35400}
+.btn-subtarea{background:#8e44ad}.btn-subtarea:hover{background:#7d3c98}
+.btn-avance{background:#16a085}.btn-avance:hover{background:#1a8a72}
+.progress-wrap{margin:8px 0 4px}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:#444;margin-bottom:3px}
+.progress-bar{width:100%;height:10px;background:#e0e0e0;border-radius:5px;overflow:hidden}
+.progress-fill{height:100%;border-radius:5px;transition:width .4s}
+.p-low{background:#c0392b}.p-mid{background:#e67e22}.p-high{background:#27ae60}
+.subtask-list{margin:10px 0 4px 16px;border-left:3px solid #bbb;padding-left:10px}
+.subtask-item{background:rgba(255,255,255,.6);border-radius:5px;padding:7px 9px;margin-bottom:6px;font-size:13px}
+.subtask-item .sub-title{font-weight:bold}
+.subtask-item .sub-resp{font-size:11px;color:#1e3a8a}
+.subtask-prog{display:flex;align-items:center;gap:8px;margin-top:5px}
+.subtask-prog input[type=range]{flex:1;margin:0;padding:0;height:6px}
+.subtask-prog input[type=number]{width:58px;margin:0;padding:3px 5px;font-size:12px;text-align:center}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:12px;padding:26px 22px;width:100%;max-width:460px;box-shadow:0 8px 32px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto}
+.modal-box h3{margin:0 0 16px;color:#1e3a8a;font-size:17px}
+.modal-box label{display:block;font-size:13px;color:#444;font-weight:bold;margin:10px 0 3px}
+.modal-box input,.modal-box select,.modal-box textarea{border:1px solid #ddd;border-radius:6px;font-size:14px;width:100%;padding:8px;margin:0}
+.modal-box input:focus,.modal-box select:focus{outline:none;border-color:#1e3a8a}
+.modal-footer{display:flex;gap:8px;margin-top:18px}
+.modal-footer button{flex:1;margin:0}
+.btn-cancelar{background:#888}.btn-cancelar:hover{background:#666}
+.btn-guardar{background:#1a6b30}.btn-guardar:hover{background:#145224}
+.avance-preview{text-align:center;font-size:22px;font-weight:bold;color:#1e3a8a;margin:6px 0}
+/* RESPONSABLES */
+.resp-row{display:flex;align-items:center;gap:8px;margin-top:6px;padding:6px 8px;background:#f9f9f9;border-radius:6px;border:1px solid #eee}
+.resp-row span{flex:1;font-size:13px}
+.btn-del-resp{background:#c0392b;width:auto;padding:3px 10px;font-size:12px;margin:0}
+.btn-del-resp:hover{background:#e74c3c}
+/* LOGIN */
 #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f6f9}
 .login-card{background:#fff;padding:40px 35px;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.12);width:100%;max-width:380px}
 .login-card h2{text-align:center;color:#1e3a8a;margin-bottom:6px;font-size:22px}
 .login-card p{text-align:center;color:#888;font-size:13px;margin-bottom:24px}
 .login-card label{display:block;font-size:13px;color:#444;margin:10px 5px 2px;font-weight:bold}
-.login-card input{border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box}
+.login-card input{border:1px solid #ddd;border-radius:6px;font-size:14px}
 .login-card input:focus{outline:none;border-color:#1e3a8a}
 #login-error{color:#c0392b;font-size:13px;text-align:center;margin-top:8px;min-height:18px}
-#login-btn{margin-top:18px;background:#1e3a8a;font-size:15px;border-radius:7px;letter-spacing:.5px}
+#login-btn{margin-top:18px;background:#1e3a8a;font-size:15px;border-radius:7px}
 .logout-btn{background:transparent;border:1px solid #fff;color:#fff;width:auto;padding:5px 14px;font-size:13px;float:right;margin-top:-5px}
 .logout-btn:hover{background:rgba(255,255,255,.15)}
 .user-badge{float:right;font-size:13px;opacity:.85;margin-top:-2px;margin-right:8px}
 #user-mgmt{display:none}
+#resp-mgmt{display:none}
 .user-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
 .user-row span{flex:1;font-size:14px}
 .del-user-btn{background:#c0392b;width:auto;padding:4px 12px;font-size:12px}
@@ -41,12 +78,13 @@ button:hover{background:#2d4fa8}
 .role-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:bold}
 .role-admin{background:#dce8ff;color:#1e3a8a}
 .role-user{background:#d4edda;color:#1a6b30}
-.task-meta{font-size:12px;color:#555;margin:3px 0}
-.task-responsable{font-size:12px;color:#1e3a8a;font-weight:bold;margin:2px 0}
+.hidden-btn{position:fixed;bottom:5px;right:5px;opacity:0.1;font-size:10px;background:transparent;color:#000;width:auto}
+.hidden-btn:hover{opacity:0.4}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <h2>Sistema de Actividades</h2>
@@ -60,6 +98,7 @@ button:hover{background:#2d4fa8}
   </div>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none">
 <header>
   <span class="user-badge" id="header-user"></span>
@@ -71,7 +110,7 @@ button:hover{background:#2d4fa8}
     <div class="card">
       <h3>Registrar tarea</h3>
       <input type="text" id="name" placeholder="Tarea">
-      <input type="text" id="responsable" placeholder="Responsable">
+      <select id="responsable"><option value="">-- Seleccionar responsable --</option></select>
       <input type="datetime-local" id="time">
       <select id="priority">
         <option value="alta">Alta</option>
@@ -80,11 +119,9 @@ button:hover{background:#2d4fa8}
       </select>
       <button onclick="addTask()">Guardar</button>
     </div>
-    <div class="card dashboard">
+    <div class="card">
       <h3>Resumen</h3>
-      <div style="position:relative;height:180px;">
-        <canvas id="pie-chart"></canvas>
-      </div>
+      <div style="position:relative;height:180px"><canvas id="pie-chart"></canvas></div>
       <div style="display:flex;justify-content:center;gap:16px;margin-top:10px;font-size:13px;flex-wrap:wrap">
         <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:2px;background:#1a6b30;display:inline-block"></span>Completadas: <b id="done-count">0</b></span>
         <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:2px;background:#c0392b;display:inline-block"></span>Pendientes: <b id="pending">0</b></span>
@@ -109,6 +146,7 @@ button:hover{background:#2d4fa8}
     <div id="list"></div>
   </div>
 
+  <!-- GESTIÓN USUARIOS (solo admin) -->
   <div class="card" id="user-mgmt">
     <h3>Gestión de usuarios</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:6px;align-items:end">
@@ -123,236 +161,505 @@ button:hover{background:#2d4fa8}
     <div id="user-error" style="color:#c0392b;font-size:13px;min-height:16px;margin-top:4px"></div>
     <div id="user-list" style="margin-top:12px"></div>
   </div>
+
+  <!-- GESTIÓN RESPONSABLES (solo admin) -->
+  <div class="card" id="resp-mgmt">
+    <h3>Gestión de responsables</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" id="new-resp-name" placeholder="Nombre completo del responsable" style="flex:1;margin:0">
+      <button onclick="addResponsable()" style="width:auto;padding:8px 16px;margin:0">Agregar</button>
+    </div>
+    <div id="resp-error" style="color:#c0392b;font-size:13px;min-height:16px;margin-top:4px"></div>
+    <div id="resp-list" style="margin-top:10px"></div>
+  </div>
 </div>
+</div>
+
+<!-- MODAL EDITAR TAREA -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal-box">
+    <h3>✏️ Editar tarea</h3>
+    <label>Tarea</label><input type="text" id="edit-name">
+    <label>Responsable</label>
+    <select id="edit-responsable"><option value="">-- Seleccionar --</option></select>
+    <label>Fecha y hora</label><input type="datetime-local" id="edit-time">
+    <label>Prioridad</label>
+    <select id="edit-priority">
+      <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
+    </select>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="closeModal('modal-edit')">Cancelar</button>
+      <button class="btn-guardar" onclick="saveEdit()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AVANCE -->
+<div class="modal-overlay" id="modal-avance">
+  <div class="modal-box">
+    <h3>📊 Actualizar avance</h3>
+    <p id="avance-task-name" style="font-weight:bold;color:#333;margin:0 0 12px"></p>
+    <label>Porcentaje de avance</label>
+    <div class="avance-preview" id="avance-preview">0%</div>
+    <input type="range" id="avance-slider" min="0" max="100" step="1" value="0" oninput="syncAvance('slider')" style="margin:4px 0">
+    <input type="number" id="avance-number" min="0" max="100" value="0" oninput="syncAvance('number')" style="margin:6px 0;text-align:center">
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="closeModal('modal-avance')">Cancelar</button>
+      <button class="btn-guardar" onclick="saveAvance()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUBTAREA -->
+<div class="modal-overlay" id="modal-sub">
+  <div class="modal-box">
+    <h3>➕ Agregar subtarea</h3>
+    <p id="sub-parent-name" style="font-size:13px;color:#555;margin:0 0 12px"></p>
+    <label>Nombre de la subtarea</label><input type="text" id="sub-name" placeholder="Subtarea">
+    <label>Responsable</label>
+    <select id="sub-responsable"><option value="">-- Seleccionar --</option></select>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="closeModal('modal-sub')">Cancelar</button>
+      <button class="btn-guardar" onclick="saveSub()">💾 Guardar</button>
+    </div>
+  </div>
 </div>
 
 <button id="clear-btn" class="hidden-btn" onclick="clearTasks()" style="display:none">limpiar</button>
 
 <script>
-const DEFAULT_USERS = [
-  {username:"admin",    password:"admin123",   role:"admin"},
-  {username:"hchoquec", password:"Reynita123", role:"user"},
-  {username:"rmedrano", password:"Roro123",    role:"user"}
+// ── RESPONSABLES ──────────────────────────────────────────
+const DEFAULT_RESPONSABLES = [
+  "ABRAHAM ANTONIO LUNA MAMANI",
+  "CESAR MATOS SUAREZ",
+  "HUGO REYNALDO CHOQUE CALLEX",
+  "MAURICIO JORGE MONTERO LOROÑO",
+  "RONALD RODRIGO MEDRANO SALAS",
+  "SERGIO ENRIQUE SANJINES FLORES",
+  "VICENTE DAVID RIVERA THOLA",
+  "ANGELA REYNA MAMANI MACEDA",
+  "GABRIELA BELEN CESPEDES ROJAS",
+  "CINTHIA HUANACO HUAJLLIRI",
+  "RAMIRO JHOEL MARTINEZ APAZA",
+  "JOSE LUIS QUISPE UCEDO",
+  "PAOLA ADRIANA CHURRUARRIN MONTECINOS"
 ];
+const RESP_KEY = "sys_responsables";
+function getResponsables(){ const r=localStorage.getItem(RESP_KEY); return r?JSON.parse(r):[...DEFAULT_RESPONSABLES]; }
+function saveResponsables(r){ localStorage.setItem(RESP_KEY,JSON.stringify(r)); }
 
-function getUsers(){
-  const u = localStorage.getItem("sys_users");
-  return u ? JSON.parse(u) : DEFAULT_USERS;
+function populateRespSelects(){
+  const list = getResponsables().sort();
+  ["responsable","edit-responsable","sub-responsable"].forEach(id=>{
+    const sel = document.getElementById(id); if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Seleccionar responsable --</option>';
+    list.forEach(r=>{ const o=document.createElement("option"); o.value=r; o.textContent=r; sel.appendChild(o); });
+    if(cur) sel.value = cur;
+  });
 }
-function saveUsers(users){ localStorage.setItem("sys_users", JSON.stringify(users)); }
+
+function addResponsable(){
+  const val = document.getElementById("new-resp-name").value.trim().toUpperCase();
+  const errEl = document.getElementById("resp-error");
+  if(!val){ errEl.textContent="Ingrese el nombre del responsable."; return; }
+  const list = getResponsables();
+  if(list.includes(val)){ errEl.textContent="El responsable ya existe."; return; }
+  list.push(val); saveResponsables(list);
+  errEl.textContent="";
+  document.getElementById("new-resp-name").value="";
+  renderResponsables(); populateRespSelects();
+}
+
+function deleteResponsable(name){
+  if(!confirm("¿Eliminar responsable: "+name+"?")) return;
+  saveResponsables(getResponsables().filter(r=>r!==name));
+  renderResponsables(); populateRespSelects();
+}
+
+function renderResponsables(){
+  const el = document.getElementById("resp-list"); el.innerHTML="";
+  getResponsables().sort().forEach(r=>{
+    const row = document.createElement("div"); row.className="resp-row";
+    row.innerHTML=`<span>👤 ${r}</span><button class="btn-del-resp" onclick="deleteResponsable('${r.replace(/'/g,"\\'")}')">Eliminar</button>`;
+    el.appendChild(row);
+  });
+}
+
+// ── USUARIOS ──────────────────────────────────────────────
+const DEFAULT_USERS = [
+  {username:"admin",        password:"admin123",         role:"admin"},
+  {username:"aluna",        password:"aluna123*",        role:"user"},
+  {username:"cmatos",       password:"cmatos123*",       role:"user"},
+  {username:"hchoque",      password:"hchoque123*",      role:"user"},
+  {username:"mmontero",     password:"mmontero123*",     role:"user"},
+  {username:"rmedrano",     password:"rmedrano123*",     role:"user"},
+  {username:"ssanjines",    password:"ssanjines123*",    role:"user"},
+  {username:"vrivera",      password:"vrivera123*",      role:"user"},
+  {username:"amamani",      password:"amamani123*",      role:"user"},
+  {username:"gcespedes",    password:"gcespedes123*",    role:"user"},
+  {username:"chuanaco",     password:"chuanaco123*",     role:"user"},
+  {username:"rmartinez",    password:"rmartinez123*",    role:"user"},
+  {username:"jquispe",      password:"jquispe123*",      role:"user"},
+  {username:"pchurruarrin", password:"pchurruarrin123*", role:"user"}
+];
+const USER_RESPONSABLE_MAP = {
+  "aluna":        "ABRAHAM ANTONIO LUNA MAMANI",
+  "cmatos":       "CESAR MATOS SUAREZ",
+  "hchoque":      "HUGO REYNALDO CHOQUE CALLEX",
+  "mmontero":     "MAURICIO JORGE MONTERO LOROÑO",
+  "rmedrano":     "RONALD RODRIGO MEDRANO SALAS",
+  "ssanjines":    "SERGIO ENRIQUE SANJINES FLORES",
+  "vrivera":      "VICENTE DAVID RIVERA THOLA",
+  "amamani":      "ANGELA REYNA MAMANI MACEDA",
+  "gcespedes":    "GABRIELA BELEN CESPEDES ROJAS",
+  "chuanaco":     "CINTHIA HUANACO HUAJLLIRI",
+  "rmartinez":    "RAMIRO JHOEL MARTINEZ APAZA",
+  "jquispe":      "JOSE LUIS QUISPE UCEDO",
+  "pchurruarrin": "PAOLA ADRIANA CHURRUARRIN MONTECINOS"
+};
+function currentResponsableName(){
+  if(!currentUser) return null;
+  return USER_RESPONSABLE_MAP[currentUser.username] || null;
+}
+function getUsers(){ const u=localStorage.getItem("sys_users"); return u?JSON.parse(u):DEFAULT_USERS; }
+function saveUsers(u){ localStorage.setItem("sys_users",JSON.stringify(u)); }
 
 let currentUser = null;
 
 function doLogin(){
-  const u = document.getElementById("input-user").value.trim();
-  const p = document.getElementById("input-pass").value;
-  const users = getUsers();
-  const found = users.find(x => x.username === u && x.password === p);
+  const u=document.getElementById("input-user").value.trim();
+  const p=document.getElementById("input-pass").value;
+  const found=getUsers().find(x=>x.username===u&&x.password===p);
   if(found){
-    currentUser = found;
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    document.getElementById("header-user").textContent = "👤 " + found.username + (found.role==="admin" ? " (Admin)" : "");
-    document.getElementById("login-error").textContent = "";
-    document.getElementById("input-pass").value = "";
-    if(found.role === "admin"){
-      document.getElementById("user-mgmt").style.display = "block";
-      document.getElementById("clear-btn").style.display = "block";
-      renderUsers();
+    currentUser=found;
+    document.getElementById("login-screen").style.display="none";
+    document.getElementById("app").style.display="block";
+    document.getElementById("header-user").textContent="👤 "+found.username+(found.role==="admin"?" (Admin)":"");
+    document.getElementById("login-error").textContent="";
+    document.getElementById("input-pass").value="";
+    populateRespSelects();
+    if(found.role==="admin"){
+      document.getElementById("user-mgmt").style.display="block";
+      document.getElementById("resp-mgmt").style.display="block";
+      document.getElementById("clear-btn").style.display="block";
+      renderUsers(); renderResponsables();
     }
     render();
-    if(Notification.permission !== "granted") Notification.requestPermission();
+    if(Notification.permission!=="granted") Notification.requestPermission();
   } else {
-    document.getElementById("login-error").textContent = "Usuario o contraseña incorrectos.";
+    document.getElementById("login-error").textContent="Usuario o contraseña incorrectos.";
   }
 }
-
-document.getElementById("input-pass").addEventListener("keydown", e => { if(e.key==="Enter") doLogin(); });
-document.getElementById("input-user").addEventListener("keydown", e => { if(e.key==="Enter") document.getElementById("input-pass").focus(); });
+document.getElementById("input-pass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("input-user").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("input-pass").focus();});
 
 function doLogout(){
-  currentUser = null;
-  document.getElementById("app").style.display = "none";
-  document.getElementById("login-screen").style.display = "flex";
-  document.getElementById("input-user").value = "";
-  document.getElementById("user-mgmt").style.display = "none";
-  document.getElementById("clear-btn").style.display = "none";
+  currentUser=null;
+  document.getElementById("app").style.display="none";
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("input-user").value="";
+  document.getElementById("user-mgmt").style.display="none";
+  document.getElementById("resp-mgmt").style.display="none";
+  document.getElementById("clear-btn").style.display="none";
 }
 
 function addUser(){
-  const u = document.getElementById("new-user").value.trim();
-  const p = document.getElementById("new-pass").value;
-  const r = document.getElementById("new-role").value;
-  const errEl = document.getElementById("user-error");
-  if(!u || !p){ errEl.textContent = "Complete usuario y contraseña."; return; }
-  const users = getUsers();
-  if(users.find(x => x.username === u)){ errEl.textContent = "El usuario ya existe."; return; }
-  users.push({username:u, password:p, role:r});
-  saveUsers(users);
-  errEl.textContent = "";
-  document.getElementById("new-user").value = "";
-  document.getElementById("new-pass").value = "";
+  const u=document.getElementById("new-user").value.trim();
+  const p=document.getElementById("new-pass").value;
+  const r=document.getElementById("new-role").value;
+  const errEl=document.getElementById("user-error");
+  if(!u||!p){errEl.textContent="Complete usuario y contraseña.";return;}
+  const users=getUsers();
+  if(users.find(x=>x.username===u)){errEl.textContent="El usuario ya existe.";return;}
+  users.push({username:u,password:p,role:r}); saveUsers(users);
+  errEl.textContent="";
+  document.getElementById("new-user").value="";
+  document.getElementById("new-pass").value="";
   renderUsers();
 }
-
 function deleteUser(username){
-  if(username === currentUser.username){ alert("No puede eliminar su propio usuario."); return; }
-  if(!confirm("¿Eliminar usuario " + username + "?")) return;
-  let users = getUsers().filter(x => x.username !== username);
-  saveUsers(users);
-  renderUsers();
+  if(username===currentUser.username){alert("No puede eliminar su propio usuario.");return;}
+  if(!confirm("¿Eliminar usuario "+username+"?"))return;
+  saveUsers(getUsers().filter(x=>x.username!==username)); renderUsers();
 }
-
 function renderUsers(){
-  const users = getUsers();
-  const el = document.getElementById("user-list");
-  el.innerHTML = "";
-  users.forEach(u => {
-    const row = document.createElement("div");
-    row.className = "user-row";
-    const roleLabel = u.role === "admin"
-      ? '<span class="role-badge role-admin">Admin</span>'
-      : '<span class="role-badge role-user">Usuario</span>';
-    const delBtn = u.username === currentUser.username
-      ? ""
-      : `<button class="del-user-btn" onclick="deleteUser('${u.username}')">Eliminar</button>`;
-    row.innerHTML = `<span>👤 <b>${u.username}</b></span>${roleLabel}${delBtn}`;
+  const el=document.getElementById("user-list"); el.innerHTML="";
+  getUsers().forEach(u=>{
+    const row=document.createElement("div"); row.className="user-row";
+    const roleLabel=u.role==="admin"?'<span class="role-badge role-admin">Admin</span>':'<span class="role-badge role-user">Usuario</span>';
+    const delBtn=u.username===currentUser.username?"":`<button class="del-user-btn" onclick="deleteUser('${u.username}')">Eliminar</button>`;
+    row.innerHTML=`<span>👤 <b>${u.username}</b></span>${roleLabel}${delBtn}`;
     el.appendChild(row);
   });
 }
 
 // ── TAREAS ────────────────────────────────────────────────
-function taskKey(){ return "tasks_" + (currentUser ? currentUser.username : "guest"); }
-let tasks = [];
-function save(){ localStorage.setItem(taskKey(), JSON.stringify(tasks)); }
-function loadTasks(){ tasks = JSON.parse(localStorage.getItem(taskKey())) || []; }
+const TASK_KEY="sys_all_tasks";
+let tasks=[];
+function save(){ localStorage.setItem(TASK_KEY,JSON.stringify(tasks)); }
+function loadTasks(){ tasks=JSON.parse(localStorage.getItem(TASK_KEY))||[]; }
 
-function addTask(){
-  const name        = document.getElementById("name").value.trim();
-  const responsable = document.getElementById("responsable").value.trim();
-  const time        = document.getElementById("time").value;
-  const priority    = document.getElementById("priority").value;
-  if(!name || !time) return;
-  tasks.push({name, responsable, time, priority, done:false, notified:false});
-  save(); render();
-  document.getElementById("name").value = "";
-  document.getElementById("responsable").value = "";
+function getAvance(t){
+  if(t.subtasks&&t.subtasks.length>0){
+    return Math.round(t.subtasks.reduce((a,s)=>a+(s.avance||0),0)/t.subtasks.length);
+  }
+  return t.avance||0;
+}
+function progressClass(p){ return p>=70?"p-high":p>=30?"p-mid":"p-low"; }
+function canEditAvance(t){
+  if(!currentUser) return false;
+  if(currentUser.role==="admin") return true;
+  const myName = currentResponsableName();
+  return myName && t.responsable && t.responsable === myName;
 }
 
-function toggle(i){ tasks[i].done = !tasks[i].done; save(); render(); }
+function addTask(){
+  const name=document.getElementById("name").value.trim();
+  const responsable=document.getElementById("responsable").value;
+  const time=document.getElementById("time").value;
+  const priority=document.getElementById("priority").value;
+  if(!name||!time) return;
+  loadTasks();
+  tasks.push({id:Date.now(),name,responsable,time,priority,done:false,notified:false,avance:0,subtasks:[]});
+  save(); render();
+  document.getElementById("name").value="";
+  document.getElementById("responsable").value="";
+}
+
+function toggle(id){
+  loadTasks();
+  const t=tasks.find(x=>x.id===id);
+  if(t&&getAvance(t)===100){ t.done=!t.done; save(); render(); }
+}
 
 function clearTasks(){
   if(confirm("¿Eliminar todas las tareas?")){
-    localStorage.removeItem(taskKey());
-    tasks = []; render();
+    localStorage.removeItem(TASK_KEY); tasks=[]; render();
   }
 }
 
 function render(){
   loadTasks();
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-  const filter = document.getElementById("filter").value;
-  let total = tasks.length, done = 0;
-  tasks.forEach((t, i) => {
+  const list=document.getElementById("list"); list.innerHTML="";
+  const filter=document.getElementById("filter").value;
+  let total=tasks.length,done=0;
+  tasks.forEach(t=>{
     if(t.done) done++;
-    if(filter==="pending" && t.done) return;
-    if(filter==="done" && !t.done) return;
-    const div = document.createElement("div");
-    div.className = "task " + t.priority + (t.done ? " done" : "");
-    const resp = t.responsable ? `<div class="task-responsable">👤 Responsable: ${t.responsable}</div>` : "";
-    div.innerHTML = `
-      <b>${t.name}</b>
+    if(filter==="pending"&&t.done) return;
+    if(filter==="done"&&!t.done) return;
+    const pct=getAvance(t);
+    const pClass=progressClass(pct);
+    const hasSubs=t.subtasks&&t.subtasks.length>0;
+    const resp=t.responsable?`<div class="task-responsable">👤 ${t.responsable}</div>`:"";
+    const canAvance=canEditAvance(t);
+    const isComplete=pct===100;
+
+    // Subtareas
+    let subsHtml="";
+    if(hasSubs){
+      subsHtml='<div class="subtask-list">';
+      t.subtasks.forEach((s,si)=>{
+        const canSubAvance=currentUser.role==="admin"||(currentResponsableName()&&s.responsable&&s.responsable===currentResponsableName());
+        const subPct=s.avance||0;
+        const subResp=s.responsable?`<div class="sub-resp">👤 ${s.responsable}</div>`:"";
+        const subControls=canSubAvance
+          ?`<div class="subtask-prog">
+              <input type="range" min="0" max="100" step="1" value="${subPct}" oninput="updateSubAvance(${t.id},${si},this.value)" style="flex:1;margin:0;padding:0">
+              <input type="number" min="0" max="100" value="${subPct}" oninput="updateSubAvance(${t.id},${si},this.value)" style="width:52px;margin:0;padding:3px 4px;font-size:12px;text-align:center">
+              <span style="font-size:12px;font-weight:bold;color:#1e3a8a;min-width:34px">${subPct}%</span>
+            </div>`
+          :`<div style="font-size:12px;color:#555;margin-top:4px">Avance: <b>${subPct}%</b></div>`;
+        subsHtml+=`<div class="subtask-item">
+          <div class="sub-title">${s.name}</div>${subResp}
+          <div class="progress-bar" style="margin:5px 0 3px"><div class="progress-fill ${progressClass(subPct)}" style="width:${subPct}%"></div></div>
+          ${subControls}</div>`;
+      });
+      subsHtml+='</div>';
+    }
+
+    const btnMarcar=`<button class="btn-marcar" onclick="toggle(${t.id})" ${!isComplete?"disabled title='Debe estar al 100% para marcar'":""}>${t.done?"↩ Desmarcar":"✔ Marcar"}</button>`;
+    const btnEditar=currentUser.role==="admin"?`<button class="btn-editar" onclick="openEdit(${t.id})">✏️ Editar</button>`:"";
+    const btnAvance=(!hasSubs&&canAvance)?`<button class="btn-avance" onclick="openAvance(${t.id})">📊 Avance</button>`:"";
+    const avanceInfo=hasSubs?`<span style="font-size:11px;color:#888;margin-left:4px">(calculado de subtareas)</span>`:"";
+
+    const div=document.createElement("div");
+    div.className=`task ${t.priority}${t.done?" done":""}`;
+    div.innerHTML=`
+      <div class="task-title">${t.name}</div>
       ${resp}
-      <div class="task-meta">📅 ${t.time.replace("T"," ")}</div>
-      <button onclick="toggle(${i})" style="width:auto;padding:4px 12px;font-size:12px;margin-top:6px">✔ Marcar</button>`;
+      <div class="task-meta">📅 ${t.time.replace("T"," ")} &nbsp;|&nbsp; Prioridad: ${t.priority}</div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Avance ${avanceInfo}</span><span style="font-weight:bold">${pct}%</span></div>
+        <div class="progress-bar"><div class="progress-fill ${pClass}" style="width:${pct}%"></div></div>
+      </div>
+      ${subsHtml}
+      <div class="task-btns">${btnMarcar}${btnEditar}<button class="btn-subtarea" onclick="openSub(${t.id})">➕ Subtarea</button>${btnAvance}</div>`;
     list.appendChild(div);
   });
-  const pending = total - done;
-  document.getElementById("total").innerText = total;
-  document.getElementById("done-count").innerText = done;
-  document.getElementById("pending").innerText = pending;
-  updatePieChart(done, pending, total);
+  const pending=total-done;
+  document.getElementById("total").innerText=total;
+  document.getElementById("done-count").innerText=done;
+  document.getElementById("pending").innerText=pending;
+  updatePieChart(done,pending,total);
 }
 
-// ── GRÁFICO TORTA ──────────────────────────────────────────
-let pieChart = null;
-function updatePieChart(done, pending, total){
-  const ctx = document.getElementById("pie-chart");
-  if(!ctx) return;
-  const isEmpty = total === 0;
-  const data   = isEmpty ? [1] : [done, pending];
-  const colors = isEmpty ? ["#e0e0e0"] : ["#1a6b30","#c0392b"];
-  const labels = isEmpty ? ["Sin tareas"] : ["Completadas","Pendientes"];
+// ── EDITAR ────────────────────────────────────────────────
+let editId=null;
+function openEdit(id){
+  loadTasks(); editId=id;
+  const t=tasks.find(x=>x.id===id);
+  document.getElementById("edit-name").value=t.name;
+  populateRespSelects();
+  document.getElementById("edit-responsable").value=t.responsable||"";
+  document.getElementById("edit-time").value=t.time;
+  document.getElementById("edit-priority").value=t.priority;
+  openModal("modal-edit");
+}
+function saveEdit(){
+  const name=document.getElementById("edit-name").value.trim();
+  const responsable=document.getElementById("edit-responsable").value;
+  const time=document.getElementById("edit-time").value;
+  const priority=document.getElementById("edit-priority").value;
+  if(!name||!time){alert("La tarea y la fecha son obligatorias.");return;}
+  loadTasks();
+  const t=tasks.find(x=>x.id===editId);
+  if(t){t.name=name;t.responsable=responsable;t.time=time;t.priority=priority;}
+  save(); closeModal("modal-edit"); render();
+}
+
+// ── AVANCE ────────────────────────────────────────────────
+let avanceId=null;
+function openAvance(id){
+  loadTasks(); avanceId=id;
+  const t=tasks.find(x=>x.id===id);
+  document.getElementById("avance-task-name").textContent=t.name;
+  const pct=t.avance||0;
+  document.getElementById("avance-slider").value=pct;
+  document.getElementById("avance-number").value=pct;
+  document.getElementById("avance-preview").textContent=pct+"%";
+  openModal("modal-avance");
+}
+function syncAvance(src){
+  let val=parseInt(src==="slider"?document.getElementById("avance-slider").value:document.getElementById("avance-number").value)||0;
+  val=Math.min(100,Math.max(0,val));
+  document.getElementById("avance-slider").value=val;
+  document.getElementById("avance-number").value=val;
+  document.getElementById("avance-preview").textContent=val+"%";
+}
+function saveAvance(){
+  const val=parseInt(document.getElementById("avance-slider").value)||0;
+  loadTasks();
+  const t=tasks.find(x=>x.id===avanceId);
+  if(t) t.avance=val;
+  save(); closeModal("modal-avance"); render();
+}
+
+function updateSubAvance(taskId,subIdx,val){
+  val=Math.min(100,Math.max(0,parseInt(val)||0));
+  loadTasks();
+  const t=tasks.find(x=>x.id===taskId);
+  if(t&&t.subtasks[subIdx]){t.subtasks[subIdx].avance=val;save();render();}
+}
+
+// ── SUBTAREAS ─────────────────────────────────────────────
+let subParentId=null;
+function openSub(id){
+  loadTasks(); subParentId=id;
+  const t=tasks.find(x=>x.id===id);
+  document.getElementById("sub-parent-name").textContent="Tarea: "+t.name;
+  document.getElementById("sub-name").value="";
+  populateRespSelects();
+  document.getElementById("sub-responsable").value="";
+  openModal("modal-sub");
+}
+function saveSub(){
+  const name=document.getElementById("sub-name").value.trim();
+  const responsable=document.getElementById("sub-responsable").value;
+  if(!name){alert("Ingrese el nombre de la subtarea.");return;}
+  loadTasks();
+  const t=tasks.find(x=>x.id===subParentId);
+  if(t){t.subtasks=t.subtasks||[];t.subtasks.push({name,responsable,avance:0});}
+  save(); closeModal("modal-sub"); render();
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+["modal-edit","modal-avance","modal-sub"].forEach(id=>{
+  document.getElementById(id).addEventListener("click",function(e){if(e.target===this)closeModal(id);});
+});
+
+// ── GRÁFICO ───────────────────────────────────────────────
+let pieChart=null;
+function updatePieChart(done,pending,total){
+  const ctx=document.getElementById("pie-chart"); if(!ctx) return;
+  const isEmpty=total===0;
+  const data=isEmpty?[1]:[done,pending];
+  const colors=isEmpty?["#e0e0e0"]:["#1a6b30","#c0392b"];
+  const labels=isEmpty?["Sin tareas"]:["Completadas","Pendientes"];
   if(pieChart){
-    pieChart.data.datasets[0].data = data;
-    pieChart.data.datasets[0].backgroundColor = colors;
-    pieChart.data.labels = labels;
-    pieChart.update();
+    pieChart.data.datasets[0].data=data;
+    pieChart.data.datasets[0].backgroundColor=colors;
+    pieChart.data.labels=labels; pieChart.update();
   } else {
-    pieChart = new Chart(ctx, {
-      type: "doughnut",
-      data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:"#fff" }] },
-      options:{
-        responsive:true, maintainAspectRatio:false, cutout:"60%",
-        plugins:{
-          legend:{ display:false },
-          tooltip:{ callbacks:{ label: c => {
-            if(isEmpty) return " Sin tareas";
-            const pct = total > 0 ? Math.round(c.parsed / total * 100) : 0;
-            return " " + c.label + ": " + c.parsed + " (" + pct + "%)";
-          }}}
-        }
-      }
+    pieChart=new Chart(ctx,{
+      type:"doughnut",
+      data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:"#fff"}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:"60%",
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{
+          if(isEmpty) return " Sin tareas";
+          const pct=total>0?Math.round(c.parsed/total*100):0;
+          return " "+c.label+": "+c.parsed+" ("+pct+"%)";
+        }}}}}
     });
   }
 }
 
 // ── NOTIFICACIONES ────────────────────────────────────────
-setInterval(() => {
+setInterval(()=>{
   if(!currentUser) return;
   loadTasks();
-  const now = new Date().toISOString().slice(0,16);
-  tasks.forEach(t => {
-    if(t.time === now && !t.notified){
-      new Notification("Recordatorio", {body: t.name});
-      t.notified = true; save();
+  const now=new Date().toISOString().slice(0,16);
+  tasks.forEach(t=>{
+    if(t.time===now&&!t.notified){
+      new Notification("Recordatorio",{body:t.name});
+      t.notified=true; save();
     }
   });
-}, 60000);
+},60000);
 
-// ── EXPORTAR EXCEL ────────────────────────────────────────
+// ── EXCEL ─────────────────────────────────────────────────
 function exportExcel(){
   loadTasks();
-  if(tasks.length === 0){ alert("No hay tareas para exportar."); return; }
-  const prioLabel = {alta:"Alta", media:"Media", baja:"Baja"};
-  const rows = tasks.map((t, i) => ({
-    "N°": i + 1,
-    "Tarea": t.name,
-    "Responsable": t.responsable || "-",
-    "Fecha / Hora": t.time.replace("T", " "),
-    "Prioridad": prioLabel[t.priority] || t.priority,
-    "Estado": t.done ? "Completada" : "Pendiente",
-    "Usuario": currentUser.username
-  }));
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws["!cols"] = [{wch:5},{wch:38},{wch:22},{wch:20},{wch:12},{wch:14},{wch:16}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Actividades");
-  const total = tasks.length;
-  const done  = tasks.filter(t => t.done).length;
-  const resumen = [
-    {"Descripción":"Total de tareas",   "Valor":total},
-    {"Descripción":"Completadas",       "Valor":done},
-    {"Descripción":"Pendientes",        "Valor":total-done},
-    {"Descripción":"Usuario",           "Valor":currentUser.username},
-    {"Descripción":"Fecha de descarga", "Valor":new Date().toLocaleString("es-BO")}
-  ];
-  const ws2 = XLSX.utils.json_to_sheet(resumen);
-  ws2["!cols"] = [{wch:22},{wch:20}];
-  XLSX.utils.book_append_sheet(wb, ws2, "Resumen");
-  const fecha = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, "actividades_" + currentUser.username + "_" + fecha + ".xlsx");
+  if(tasks.length===0){alert("No hay tareas para exportar.");return;}
+  const prioLabel={alta:"Alta",media:"Media",baja:"Baja"};
+  const rows=[];
+  tasks.forEach((t,i)=>{
+    rows.push({"N°":i+1,"Tipo":"Tarea","Tarea":t.name,"Subtarea":"-","Responsable":t.responsable||"-",
+      "Fecha / Hora":t.time.replace("T"," "),"Prioridad":prioLabel[t.priority]||t.priority,
+      "Avance (%)":getAvance(t),"Estado":t.done?"Completada":"Pendiente"});
+    (t.subtasks||[]).forEach((s,si)=>{
+      rows.push({"N°":(i+1)+"."+(si+1),"Tipo":"Subtarea","Tarea":t.name,"Subtarea":s.name,
+        "Responsable":s.responsable||"-","Fecha / Hora":"-","Prioridad":"-",
+        "Avance (%)":s.avance||0,"Estado":"-"});
+    });
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws["!cols"]=[{wch:6},{wch:9},{wch:32},{wch:28},{wch:30},{wch:18},{wch:10},{wch:12},{wch:13}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Actividades");
+  const total=tasks.length,done=tasks.filter(t=>t.done).length;
+  const ws2=XLSX.utils.json_to_sheet([
+    {"Descripción":"Total de tareas","Valor":total},
+    {"Descripción":"Completadas","Valor":done},
+    {"Descripción":"Pendientes","Valor":total-done},
+    {"Descripción":"Usuario","Valor":currentUser.username},
+    {"Descripción":"Fecha de descarga","Valor":new Date().toLocaleString("es-BO")}
+  ]);
+  ws2["!cols"]=[{wch:22},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws2,"Resumen");
+  XLSX.writeFile(wb,"actividades_"+new Date().toISOString().slice(0,10)+".xlsx");
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
